@@ -13,7 +13,7 @@ import (
 )
 
 // Usage :
-// Click http://127.0.0.1:28080/test?p=50&i=2.5&d=1.5 and adjust p、i、d
+// Click http://127.0.0.1:28080/test?p=80&i=50&d=0 and adjust p、i、d
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	http.HandleFunc("/test", paint)
@@ -44,7 +44,7 @@ func paint(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	c, err := p.WriterTo(1200, 500, "jpg")
+	c, err := p.WriterTo(1000, 600, "jpg")
 	if err != nil {
 		panic(err)
 	}
@@ -62,6 +62,7 @@ func runPID(p, i, d float64) []plotter.XYs {
 	var targetSpeed float64 = 80 * 1000
 	var m float64 = 1000
 	var v float64
+	var F float64
 
 	points := make([]plotter.XYs, 2)
 	points[0] = make(plotter.XYs, xAxis)
@@ -76,17 +77,10 @@ func runPID(p, i, d float64) []plotter.XYs {
 		// target line
 		points[0][i].Y = targetSpeed
 		// real speed line
-		F := c.CalcIncPID(v)
-		if F > 5000000 {
-			F = 5000000
-		}
+		F += c.CalcIncPID(v)
 		a := F / m
 		v = v + a*1
 		points[1][i].Y = v
-
-		// make some error
-		v += rand.Float64() * 10 * c.Kp
-		v -= rand.Float64() * 10 * c.Kp
 
 		// change target
 		if i == 60 {
