@@ -31,7 +31,7 @@ func (p *PID) CalcIncPID(currentValue float64) float64 {
 	p.locker.Lock()
 	defer p.locker.Unlock()
 	errorValue := p.TargetValue - currentValue
-	output := p.Kp * (errorValue + p.Ki*p.lastError + p.Kd*p.prevError)
+	output := p.Kp*(errorValue-p.lastError) + p.Ki*errorValue + p.Kd*(errorValue-2*p.lastError+p.prevError)
 	p.prevError = p.lastError
 	p.lastError = errorValue
 	return output
